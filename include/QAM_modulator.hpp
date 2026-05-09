@@ -1,7 +1,11 @@
 #pragma once
 
+#include <iostream>
 #include <complex>
 #include <vector>
+#include <spdlog/spdlog.h>
+
+#define DEBUG 0
 
 using sample = std::complex<float>;
 

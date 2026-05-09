@@ -1,9 +1,24 @@
 #include "../include/QAM_modulator.hpp"
-#include <spdlog/spdlog.h>
-
-
 
 std::vector<sample> QAM_modulator::QAM_modulation(const int& mod_order, const std::vector<int8_t>& bits){
+
+    // check input data
+    if(bits.empty()){
+        if(DEBUG){
+            spdlog::error("[QAM_modulator::QAM_modulation]: Input bits vector is empty!");
+        }
+        return {};
+    }
+
+    for(int i = 0; i < bits.size(); ++i){
+        if(bits[i] != 0 && bits[i] != 1){
+            if(DEBUG){
+                spdlog::error("[QAM_modulator::QAM_modulation]: Invalid value in input bits! Bits must be 0 or 1!");
+            }
+            return {};
+        }
+    }
+
     if(mod_order == 4){
         return QPSK_modulation(bits);
     }
@@ -14,14 +29,18 @@ std::vector<sample> QAM_modulator::QAM_modulation(const int& mod_order, const st
         return QAM64_modulation(bits);
     }
 
-    spdlog::error("[QAM_modulator::QAM_modulation]: Invalid modulation order. Try 4, 16, 64!");
+    if(DEBUG){
+        spdlog::error("[QAM_modulator::QAM_modulation]: Invalid modulation order. Try 4, 16, 64!");
+    }
     return {};
 }
 
 std::vector<sample> QAM_modulator::QPSK_modulation(const std::vector<int8_t>& bits){
     // check size
     if(bits.size() % 2 != 0){
-        spdlog::error("[QAM_modulator::QPSK_modulation]: Invalid bits size! Size must be a multiple of 2!");
+        if(DEBUG){
+            spdlog::error("[QAM_modulator::QPSK_modulation]: Invalid bits size! Size must be a multiple of 2!");
+        }
         return {};
     }
 
@@ -36,8 +55,8 @@ std::vector<sample> QAM_modulator::QPSK_modulation(const std::vector<int8_t>& bi
     double coeff = 1 / std::sqrt(2);
 
     for(int i = 0; i <= bits.size() - 1; i+=2){
-        I = (1 - 2*bits[i]) / coeff;
-        Q = (1 - 2*bits[i+1]) / coeff;
+        I = (1 - 2*bits[i]) * coeff;
+        Q = (1 - 2*bits[i+1]) * coeff;
 
         symbols.push_back(sample(I,Q));
     }
@@ -48,7 +67,9 @@ std::vector<sample> QAM_modulator::QPSK_modulation(const std::vector<int8_t>& bi
 std::vector<sample> QAM_modulator::QAM16_modulation(const std::vector<int8_t>& bits){
     // check size
     if(bits.size() % 4 != 0){
-        spdlog::error("[QAM_modulator::QAM16_modulation] Invalid bits size! Size must be a multiple of 4!");
+        if(DEBUG){
+            spdlog::error("[QAM_modulator::QAM16_modulation] Invalid bits size! Size must be a multiple of 4!");
+        }
         return {};
     }
 
@@ -60,14 +81,15 @@ std::vector<sample> QAM_modulator::QAM16_modulation(const std::vector<int8_t>& b
     double I,Q;
 
     // Coefficient for energy normalization
-    double coeff = 1 / std::sqrt(10);
+    double coeff = 1.0 / std::sqrt(10);
 
-    for(int i = 0; i <= bits.size() - 4; i+=4){
-        I = ( (1 - 2*bits[i]) * (2 - (1 - 2*bits[i+2]) ) ) / coeff;
-        Q = ( (1 - 2*bits[i+1]) * (2 - (1 - 2*bits[i+3]) ) ) / coeff;;
+    for(int i = 0; i < bits.size(); i += 4){
+        I = ( (1 - 2*bits[i]) * (2 - (1 - 2*bits[i+2])) ) * coeff;
+        Q = ( (1 - 2*bits[i+1]) * (2 - (1 - 2*bits[i+3])) ) * coeff;
 
-        symbols.push_back(sample(I,Q));
+        symbols.push_back(sample(I, Q));
     }
+
 
     return symbols;
 }
@@ -75,11 +97,13 @@ std::vector<sample> QAM_modulator::QAM16_modulation(const std::vector<int8_t>& b
 std::vector<sample> QAM_modulator::QAM64_modulation(const std::vector<int8_t>& bits){
     // check size
     if(bits.size() % 6 != 0){
-        spdlog::error("[QAM_modulator::QAM64_modulation]: Invalid bits size! Size must be a multiple of 6!");
+        if(DEBUG){
+            spdlog::error("[QAM_modulator::QAM64_modulation]: Invalid bits size! Size must be a multiple of 6!");
+        }
         return {};
     }
 
-    // QAM16 symbol = 6 bits
+    // QAM64 symbol = 6 bits
     int symbols_count = bits.size() / 6;
     std::vector<sample> symbols;
     symbols.reserve(symbols_count);
@@ -87,14 +111,15 @@ std::vector<sample> QAM_modulator::QAM64_modulation(const std::vector<int8_t>& b
     double I,Q;
 
     // Coefficient for energy normalization
-    double coeff = 1 / std::sqrt(42);
+    double coeff = 1.0 / std::sqrt(42);
 
-    for(int i = 0; i <= bits.size() - 6; i+=6){
-        I = ( (1 - 2*bits[i]) * (4 - (1 - 2*bits[i+2]) ) * (2 - (1 - 2*bits[i+4]) ) ) / coeff;
-        Q = ( (1 - 2*bits[i+1]) * (2 - (1 - 2*bits[i+3]) ) * (2 - (1 - 2*bits[i+5]) ) ) / coeff;
+    for(int i = 0; i < bits.size(); i += 6){
 
-        symbols.push_back(sample(I,Q));
-    }
+    I = (1 - 2*bits[i]) * (4 - (1 - 2*bits[i+2]) * (2 - (1 - 2*bits[i+4]))) * coeff;
+    Q = (1 - 2*bits[i+1]) * (4 - (1 - 2*bits[i+3]) * (2 - (1 - 2*bits[i+5]))) * coeff;
+    
+    symbols.push_back(sample(I, Q));
+}
 
     return symbols;
 }
