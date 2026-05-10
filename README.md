@@ -44,7 +44,7 @@ make
 
 Структура модулятора:
 
-![](/yadro-test-task1/images/modulator_scheme.png)
+![](images/modulator_scheme.png)
 
 Модулятор имеет один метод **QAM_modulation(M, bits)**, который выполняет модуляцию битов **bits** для **M=4,16,64** (кол-во точек в созвездии). 
 
