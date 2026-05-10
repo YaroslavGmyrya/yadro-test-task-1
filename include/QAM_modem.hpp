@@ -17,6 +17,7 @@ class QAM_modulator{
             qam64_constellation = generate_constellation(64);
         }
 
+        // Modulate bits to symbols. M - count of point in constellation (4, 16, 64)
         std::vector<sample> QAM_modulation(const std::vector<int8_t>& bits, const int& M);
 
     private:
@@ -36,6 +37,7 @@ class QAM_demodulator{
             QAM64_constellation = generate_constellation(64);
         }
 
+        // Demodulate symbols to bits. M - count of point in constellation (4, 16, 64)
         std::vector<int8_t> QAM_demodulation(const int& M, const std::vector<sample>& symbols);
 
     private:

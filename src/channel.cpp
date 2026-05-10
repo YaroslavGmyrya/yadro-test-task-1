@@ -1,20 +1,26 @@
 #include "../include/channel.hpp"
 
-std::vector<sample> channel::AWGN(std::vector<sample> &samples, float SNR)
+std::vector<sample> channel::AWGN(const std::vector<sample> &samples, const float& SNR, const int& M)
 {
-    // calculate signal power
+    // calculate power per symbol
     float mean_Es = 0;
     for (const sample& el : samples){
         mean_Es += std::norm(el);
     }
-
-    // mean power
     mean_Es /= samples.size();
 
     // noise dispersion
+    float bits_per_symbol = std::log2(M);
     float lin_SNR = std::pow(10, SNR / 10);
-    float E_n = mean_Es / lin_SNR;
-    float sigma = std::sqrt(E_n / 2);
+
+    // energy per bit
+    float E_b = mean_Es / bits_per_symbol;
+    
+    // spectral noise density
+    float N0 = E_b / lin_SNR;
+
+    // noise dispersion
+    float sigma = std::sqrt(N0 / 2);
 
     // create generator
     std::random_device rd;

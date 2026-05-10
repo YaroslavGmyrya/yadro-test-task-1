@@ -1,7 +1,7 @@
 #include "../include/sub_func.hpp"
 #include <spdlog/spdlog.h>
 
-// ============================================================ GENERATE BITS =============================================================
+// Generate random bits and check size, values of result
 int GENERATE_BITS_TEST(){
     const uint N = 10;
     std::vector<int8_t> bits = generate_bits(N);
@@ -25,7 +25,7 @@ int GENERATE_BITS_TEST(){
     return error;
 }
 
-// ============================================================ DEC TO BIN =============================================================
+// Translate decimal number to binary, check size, values of result and compare with expected bits
 int DEC_TO_BIN_TEST(){
     const int num = 10;
     const int size = 4;
@@ -57,7 +57,7 @@ int DEC_TO_BIN_TEST(){
     return error;
 }
 
-// ============================================================ BIN TO DEC =============================================================
+// Translate binary number to decimal, check values of result and compare with expected number
 int BIN_TO_DEC_TEST(){
     std::vector<int8_t> bits = {1, 0, 1, 0};
     const int expected_num = 10;
@@ -66,7 +66,7 @@ int BIN_TO_DEC_TEST(){
     int num = bin_to_dec(bits);
 
     // if bad answer   
-     if(num != expected_num){
+    if(num != expected_num){
         spdlog::error("[BIN_TO_DEC_TEST]: Result does not match expected number!");
         error = 1;
     }

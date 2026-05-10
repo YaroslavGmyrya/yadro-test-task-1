@@ -4,17 +4,19 @@ project(main LANGUAGES CXX)
 # find spdlog
 find_package(spdlog REQUIRED)
 
-# set source file
+# set source files
 set(SRC 
     src/QAM_modem.cpp
     src/channel.cpp
     src/sub_funcs.cpp
 )
 
+# set tests files
 set(TEST 
     tests/main.cpp
     tests/sub_funcs.cpp
     tests/QAM_modem.cpp
+    tests/channel.cpp
 )
 
 # create executable file

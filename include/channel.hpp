@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 
 #include <vector>
 #include <complex>
@@ -8,5 +8,6 @@ using sample = std::complex<float>;
 
 class channel{
     public:
-        std::vector<sample> AWGN(std::vector<sample> &samples, float SNR);
+        // Add Additive White Gaussian Noise (AWGN) to signal. SNR - Signal Noise Ratio (db)
+        std::vector<sample> AWGN(const std::vector<sample> &samples, const float& SNR, const int& M);
 };
