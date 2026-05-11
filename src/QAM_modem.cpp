@@ -4,7 +4,7 @@
 std::vector<sample> generate_constellation(const int& M){
 
     if(M != 4 && M != 16 && M != 64){
-        spdlog::error("[generate_constellation]: Invalid modulation order. Try 4, 16, 64!");
+        spdlog::error("[QAM_modem.cpp:generate_constellation]: Invalid modulation order. Try 4, 16, 64!");
         return {};
     }
 
@@ -67,9 +67,7 @@ std::vector<sample> QAM_modulator::QAM_modulation(const std::vector<int8_t>& bit
     }
 
     else{
-        if(DEBUG){
-            spdlog::error("[QAM_modulator::QAM_modulation]: Invalid modulation order. Try 4, 16, 64!");
-        }
+        logger->error("[QAM_modulator::QAM_modulation]: Invalid modulation order. Try 4, 16, 64!");
         return {};
     }
 
@@ -110,9 +108,7 @@ std::vector<int8_t> QAM_demodulator::QAM_demodulation(const int& M, const std::v
         constellation = QAM64_constellation;
     }
     else{
-        if(DEBUG){
-            spdlog::error("[QAM_demodulator::QAM_demodulation]: Invalid modulation order. Try 4, 16, 64!");
-        }
+        logger->error("[QAM_demodulator::QAM_demodulation]: Invalid modulation order. Try 4, 16, 64!");
         return {};
     }
 

@@ -13,10 +13,10 @@ set(SRC
 
 # set tests files
 set(TEST 
-    tests/main.cpp
-    tests/sub_funcs.cpp
-    tests/QAM_modem.cpp
-    tests/channel.cpp
+    tests/main_test.cpp
+    tests/sub_funcs_test.cpp
+    tests/QAM_modem_test.cpp
+    tests/channel_test.cpp
 )
 
 # create executable file
