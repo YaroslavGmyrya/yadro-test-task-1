@@ -32,7 +32,7 @@ int DEC_TO_BIN_TEST(){
     int error = 0;
 
     std::vector<int8_t> bits = dec_to_bin(num, size);
-     std::vector<int8_t> expected_bits = {1, 0, 1, 0};
+    std::vector<int8_t> expected_bits = {1, 0, 1, 0};
 
 
     // if invalid size

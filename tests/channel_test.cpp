@@ -1,37 +1,44 @@
+#include "../include/QAM_modem.hpp"
 #include "../include/channel.hpp"
 #include "../include/sub_func.hpp"
-#include "../include/QAM_modem.hpp"
+#include "../include/matplotlibcpp.h"
 
-int AWGN_TEST(){
-    const int N = 36000;
-    float SNR = 24;
-    std::vector<int> M = {4, 16, 64};
+namespace plt = matplotlibcpp;
 
+int CHANNEL_TEST(){
     QAM_modulator modulator;
     channel ch;
 
+    const double EbN0 = 20;
+    const int N = 6000;
+
     std::vector<int8_t> bits = generate_bits(N);
 
-    std::vector<sample> samples;
-    std::vector<sample> noisy_samples;
-    std::string filename;
+    std::vector<sample> symbols;
+    
+    std::vector<double> I;
+    std::vector<double> Q;
 
-    int error = 0;
+    for(const mod_type& el : allowed_modulations){
+        I.clear();
+        Q.clear();
 
-    for(const int& m : M){
-        samples = modulator.QAM_modulation(bits, m);
+        symbols = modulator.QAM_modulation(bits, el);
+        symbols = ch.AWGN(symbols, EbN0, el);
 
-        if(samples.size() == 0){
-            error = 1;
-            continue;
+        for(const sample& point : symbols){
+            I.push_back(point.real());
+            Q.push_back(point.imag());
         }
 
-        noisy_samples = ch.AWGN(samples, SNR, m);
+        plt::scatter(I, Q, 150);
+        plt::xlabel("I");
+        plt::ylabel("Q");
+        plt::title(std::to_string(el) + "-" + "QAM constellation on RX, EbN0 = " + std::to_string(EbN0));
+        plt::show();
 
-        filename = "../pcm/NOISLY_" + std::to_string(m) + "_SAMPLES.pcm";
-        write_to_file<sample>(filename.data(), noisy_samples);
+
     }
 
-    return error;
-
+    return 0;  
 }

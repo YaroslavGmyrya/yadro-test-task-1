@@ -1,72 +1,66 @@
+#include <iostream>
+
 #include "../include/QAM_modem.hpp"
 #include "../include/sub_func.hpp"
 #include "../include/channel.hpp"
 #include "../include/sub_func.hpp"
+#include "../include/simulation.hpp"
+#include "../include/matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
 
 int main(){
+    // 1. Create config
+    sim_config config;
+    config.M = {QPSK, QAM16, QAM64};
+    config.N = 60000;
+    config.REALIZATIONS = 40;
 
-    // Model parameters
-    std::vector<int> M = {4, 16, 64};
-    const int N = 102000; // Count of bits
+    config.MIN_EbN0 = 0;
+    config.MAX_EbN0 = 20;
+    config.STEP_EbN0 = 0.5;
 
-    const float MIN_SNR = 0;
-    const float MAX_SNR = 19;
-    const float STEP_SNR = 0.5;
+    config.demod_type = "soft";
 
-    std::vector<float> SNRs; //SNR sets (dB)
-    for(float i = MIN_SNR; i <= MAX_SNR; i += STEP_SNR){
-        SNRs.push_back(i);
+    // 2.Run simulation
+    sim_out results;
+    results = run_simulation(config);
+
+    // 3. Compute theoretical BER (EbN0 axis)
+    std::vector<std::vector<float>> theor_ber(config.M.size());
+    for(int i = 0; i < theor_ber.size(); ++i){
+        theor_ber[i] = QAM_theoretical_ber(results.EbN0_axis, config.M[i]);
     }
 
-    const int REALIZATIONS = 100; // Count of realizations for each SNR
-
-    // Create objects
-    QAM_demodulator demodulator;
-    QAM_modulator modulator;
-    channel ch;
-
-    std::vector<int8_t> tx_bits;
-    std::vector<sample> tx_symbols;
-    std::vector<sample> rx_symbols;
-    std::vector<int8_t> rx_bits;
-    std::string filename;
-
-    float BER;
-
-    std::vector<sample> SNR_snd_BER;
-    SNR_snd_BER.reserve(SNRs.size());
-
-    // iterate on modulation order
-    for(const int& m : M){
-        SNR_snd_BER.clear();
-
-        // iterate on SNR
-        for(const float& SNR : SNRs){
-            BER = 0;
-            for(int i = 0; i < REALIZATIONS; ++i){
-                // 1. Generate bits
-                tx_bits = generate_bits(N);
-        
-                // 2. Generate symbols
-                tx_symbols = modulator.QAM_modulation(tx_bits, m);
-        
-                // 3. AWGN
-                rx_symbols = ch.AWGN(tx_symbols, SNR, m);
-        
-                // 4. Demodulation
-                rx_bits = demodulator.QAM_demodulation(m, rx_symbols);
-        
-                // 5. Calculate BER
-                BER += calculate_ber(tx_bits, rx_bits);
-            }
-
-            SNR_snd_BER.push_back(sample(SNR, BER / REALIZATIONS));
-        }
-
-        filename = "../pcm/SNR_BER_QAM_" + std::to_string(m) + ".pcm";
-
-        write_to_file<sample>(filename.data(), SNR_snd_BER);
+    // 4. Plot emperical/theoretical BER (disperssion axis)
+    for(int i = 0; i < config.M.size(); ++i){
+        int m = config.M[i];
+        plt::named_semilogy("Emperical QAM"+std::to_string(m)+" BER", results.EbN0_axis, results.BER[i], "--");
+        plt::named_semilogy("Theoretical QAM"+std::to_string(m)+" BER", results.EbN0_axis, theor_ber[i]);
     }
+
+    plt::xlabel("EbN0");
+    plt::ylabel("BER");
+    plt::title("BER(EbN0)");
+    plt::grid(true);
+    plt::legend();
+    plt::ylim(1e-6, 1.0);
+    plt::show();
+
+    // 5. Plot emperical/theoretical BER (disperssion axis)
+    for(int i = 0; i < config.M.size(); ++i){
+        int m = config.M[i];
+        plt::named_semilogy("Emperical QAM"+std::to_string(m)+" BER", results.disp_axis[i], results.BER[i], "--");
+        plt::named_semilogy("Theoretical QAM"+std::to_string(m)+" BER", results.disp_axis[i], theor_ber[i]);
+    }
+
+    plt::xlabel("N0");
+    plt::ylabel("BER");
+    plt::title("BER(N0)");
+    plt::grid(true);
+    plt::legend();
+    plt::ylim(1e-6, 1.0);
+    plt::show();
 
     return 0;
 }

@@ -1,17 +1,40 @@
 #include "../include/QAM_modem.hpp"
 #include "../include/sub_func.hpp"
+#include "../include/matplotlibcpp.h"
+#include <bitset>
+
+namespace plt = matplotlibcpp;
 
 // Generate all constellation and write to files for testing in PYTHON script (check_consellation.py)
 int QAM_CONSTELLATION_TEST(){
     QAM_modulator modulator;
 
-    std::vector<sample> QPSK_constellation = generate_constellation(4);
-    std::vector<sample> QAM16_constellation = generate_constellation(16);
-    std::vector<sample> QAM64_constellation = generate_constellation(64);
+    std::vector<sample> constellation;
+    std::vector<double> I;
+    std::vector<double> Q;
 
-    write_to_file<sample>("../pcm/QPSK_constellation.pcm", QPSK_constellation);
-    write_to_file<sample>("../pcm/QAM16_constellation.pcm", QAM16_constellation);
-    write_to_file<sample>("../pcm/QAM64_constellation.pcm", QAM64_constellation);
+    for(const mod_type& el : allowed_modulations){
+        int bits_per_symbol = std::log2((int)el);
+
+        I.clear();
+        Q.clear();
+
+        constellation = modulator.generate_constellation(el);
+
+        for(int i = 0; i < constellation.size(); ++i){
+            I.push_back(constellation[i].real());
+            Q.push_back(constellation[i].imag());
+
+            std::string label = std::bitset<6>(i).to_string();
+            plt::annotate(label, I[i], Q[i]);
+        }
+
+        plt::scatter(I, Q, 150);
+        plt::xlabel("I");
+        plt::ylabel("Q");
+        plt::title(std::to_string(el) + "-" + "QAM constellation on TX");
+        plt::show();
+    }
 
     return 0;  
 }
@@ -20,8 +43,6 @@ int QAM_CONSTELLATION_TEST(){
 int QAM_MODEM_TEST(){
     QAM_modulator modulator;
     QAM_demodulator demodulator;
-
-    std::vector<int> M = {4, 16, 64};
     
     float error = 0;
 
@@ -29,10 +50,10 @@ int QAM_MODEM_TEST(){
     std::vector<sample> symbols;
     std::vector<int8_t> demodulated_bits;
 
-    for(const int& m : M){
+    for(const mod_type& m : allowed_modulations){
         bits = generate_bits(600);
         symbols = modulator.QAM_modulation(bits, m);
-        demodulated_bits = demodulator.QAM_demodulation(m, symbols);
+        demodulated_bits = demodulator.QAM_soft_demodulation(symbols, m);
 
         error += calculate_ber(bits, demodulated_bits);
     }

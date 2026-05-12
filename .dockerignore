@@ -1,6 +1,7 @@
 build/
 images/
 pcm/
+logs/
 .gitignore
 install.sh
 analyzer.py
