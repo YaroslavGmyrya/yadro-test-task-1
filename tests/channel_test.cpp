@@ -12,7 +12,7 @@ int CHANNEL_TEST(){
     const double EbN0 = 20;
     const int N = 6000;
 
-    std::vector<int8_t> bits = generate_bits(N);
+    std::vector<uint8_t> bits = generate_bits(N);
 
     std::vector<sample> symbols;
     

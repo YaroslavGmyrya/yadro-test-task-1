@@ -10,7 +10,7 @@ std::vector<sample> QAM_base::generate_constellation(const mod_type& type){
     std::vector<sample> constellation(M);
 
     sample symbol;
-    std::vector<int8_t> bits;
+    std::vector<uint8_t> bits;
 
     float I, Q, coeff;
 
@@ -52,17 +52,17 @@ std::vector<sample> QAM_base::generate_constellation(const mod_type& type){
     return constellation;
 }
 
-std::vector<sample> QAM_modulator::QAM_modulation(const std::vector<int8_t>& bits, const mod_type& type){
+std::vector<sample> QAM_modulator::QAM_modulation(const std::vector<uint8_t>& bits, const mod_type& type){
 
     const int M = type;
 
-    std::vector<sample> constellation = constellations[M];
+    std::vector<sample> constellation = constellations[type];
 
     const int bits_per_symbol = std::log2(M);
 
     std::vector<sample> result(bits.size() / bits_per_symbol);
 
-    std::vector<int8_t> symbol_bits(bits_per_symbol);
+    std::vector<uint8_t> symbol_bits(bits_per_symbol);
 
     int index = 0;
     int k = 0;
@@ -81,22 +81,22 @@ std::vector<sample> QAM_modulator::QAM_modulation(const std::vector<int8_t>& bit
 }
 
 
-std::vector<int8_t> QAM_demodulator::QAM_soft_demodulation(const std::vector<sample>& symbols, const mod_type& type){
-
-    const int M = type;
+std::vector<uint8_t> QAM_demodulator::QAM_soft_demodulation(const std::vector<sample>& symbols, const mod_type& type){
     
-    std::vector<sample> constellation = constellations[M];
+    std::vector<sample> constellation = constellations[type];
 
-    int bits_per_symbol = std::log2(M);
+    int bits_per_symbol = std::log2((int)type);
 
-    std::vector<int8_t> bits;
+    std::vector<uint8_t> bits;
     bits.reserve(symbols.size() * bits_per_symbol);
 
     for(int i = 0; i < symbols.size(); ++i){
+        // first distance
         float min_distance = std::norm(symbols[i] - constellation[0]);
         float cur_distance;
         int index = 0;
 
+        // calculate all distance bw points and find minimum
         for(int j = 1; j < constellation.size(); ++j){
             cur_distance = std::norm(symbols[i] - constellation[j]);
             if(cur_distance < min_distance){
@@ -105,9 +105,10 @@ std::vector<int8_t> QAM_demodulator::QAM_soft_demodulation(const std::vector<sam
             }
         }
 
-        std::vector<int8_t> symbol_bits = dec_to_bin(index, bits_per_symbol);
+        std::vector<uint8_t> symbol_bits = dec_to_bin(index, bits_per_symbol);
 
-        for(const int8_t& bit : symbol_bits){
+        // write minimum value to file
+        for(const uint8_t& bit : symbol_bits){
             bits.push_back(bit);
         }
     }
@@ -115,7 +116,7 @@ std::vector<int8_t> QAM_demodulator::QAM_soft_demodulation(const std::vector<sam
     return bits;
 }
 
-std::vector<int8_t> QAM_demodulator::QAM_hard_demodulation(const std::vector<sample>& symbols, const mod_type& M){
+std::vector<uint8_t> QAM_demodulator::QAM_hard_demodulation(const std::vector<sample>& symbols, const mod_type& M){
     if(M == QPSK){
         return QPSK_hard_demodulation(symbols);
     }
@@ -132,8 +133,8 @@ std::vector<int8_t> QAM_demodulator::QAM_hard_demodulation(const std::vector<sam
 }
 
 
-std::vector<int8_t> QAM_demodulator::QPSK_hard_demodulation(const std::vector<sample>& symbols){
-    std::vector<int8_t> result(symbols.size() * 2);
+std::vector<uint8_t> QAM_demodulator::QPSK_hard_demodulation(const std::vector<sample>& symbols){
+    std::vector<uint8_t> result(symbols.size() * 2);
 
     for (int i = 0; i < symbols.size(); ++i) {
         double I = symbols[i].real();
@@ -148,9 +149,9 @@ std::vector<int8_t> QAM_demodulator::QPSK_hard_demodulation(const std::vector<sa
 
 }
 
-std::vector<int8_t> QAM_demodulator::QAM16_hard_demodulation(const std::vector<sample>& symbols){
+std::vector<uint8_t> QAM_demodulator::QAM16_hard_demodulation(const std::vector<sample>& symbols){
 
-    std::vector<int8_t> result(symbols.size() * 4);
+    std::vector<uint8_t> result(symbols.size() * 4);
 
   for (int i = 0; i < symbols.size(); ++i) {
 
@@ -191,8 +192,8 @@ std::vector<int8_t> QAM_demodulator::QAM16_hard_demodulation(const std::vector<s
 }
 
 
-std::vector<int8_t> QAM_demodulator::QAM64_hard_demodulation(const std::vector<sample>& symbols) {
-    std::vector<int8_t> result(symbols.size() * 6);
+std::vector<uint8_t> QAM_demodulator::QAM64_hard_demodulation(const std::vector<sample>& symbols) {
+    std::vector<uint8_t> result(symbols.size() * 6);
 
     for (int i = 0; i < symbols.size(); ++i) {
         double I = symbols[i].real();

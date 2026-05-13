@@ -46,9 +46,9 @@ int QAM_MODEM_TEST(){
     
     float error = 0;
 
-    std::vector<int8_t> bits;
+    std::vector<uint8_t> bits;
     std::vector<sample> symbols;
-    std::vector<int8_t> demodulated_bits;
+    std::vector<uint8_t> demodulated_bits;
 
     for(const mod_type& m : allowed_modulations){
         bits = generate_bits(600);

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+
 #include "../include/QAM_modem.hpp"
 
 struct sim_config {
@@ -19,8 +21,8 @@ struct sim_config {
 
 struct sim_out {
     std::vector<float> EbN0_axis;
-    std::vector<std::vector<float>> disp_axis;
-    std::vector<std::vector<float>> BER;
+    std::unordered_map<mod_type, std::vector<float>> disp_axis;
+    std::unordered_map<mod_type, std::vector<float>> BER;
 };
 
 sim_out run_simulation(const sim_config& config);

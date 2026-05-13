@@ -4,7 +4,7 @@
 // Generate random bits and check size, values of result
 int GENERATE_BITS_TEST(){
     const uint N = 10;
-    std::vector<int8_t> bits = generate_bits(N);
+    std::vector<uint8_t> bits = generate_bits(N);
 
     int error = 0;
 
@@ -15,7 +15,7 @@ int GENERATE_BITS_TEST(){
     }
 
     // if invalid values
-    for(const int8_t& el : bits){
+    for(const uint8_t& el : bits){
         if(el != 0 && el != 1){
             spdlog::error("[GENERATE_BITS_TEST]: Invalid value in bits! Bit should be 0 or 1!");
             error = 1;
@@ -31,8 +31,8 @@ int DEC_TO_BIN_TEST(){
     const int size = 4;
     int error = 0;
 
-    std::vector<int8_t> bits = dec_to_bin(num, size);
-    std::vector<int8_t> expected_bits = {1, 0, 1, 0};
+    std::vector<uint8_t> bits = dec_to_bin(num, size);
+    std::vector<uint8_t> expected_bits = {1, 0, 1, 0};
 
 
     // if invalid size
@@ -42,7 +42,7 @@ int DEC_TO_BIN_TEST(){
     }
 
     // if invalid values
-    for(const int8_t& el : bits){
+    for(const uint8_t& el : bits){
         if(el != 0 && el != 1){
             spdlog::error("[DEC_TO_BIN_TEST]: Invalid value in bits! Bit should be 0 or 1!");
             error = 1;
@@ -59,7 +59,7 @@ int DEC_TO_BIN_TEST(){
 
 // Translate binary number to decimal, check values of result and compare with expected number
 int BIN_TO_DEC_TEST(){
-    std::vector<int8_t> bits = {1, 0, 1, 0};
+    std::vector<uint8_t> bits = {1, 0, 1, 0};
     const int expected_num = 10;
     int error = 0;
 

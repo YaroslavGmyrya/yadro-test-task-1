@@ -24,7 +24,7 @@ inline std::vector<mod_type> allowed_modulations = {QPSK, QAM16, QAM64};
 
 class QAM_base{
     public:
-        QAM_base(const std::string& logger_name, const std::string log_filename){
+        QAM_base(const std::string& logger_name, const std::string& log_filename){
         
         // create logger
         logger = spdlog::get(logger_name);
@@ -35,13 +35,13 @@ class QAM_base{
 
         // generate constellations
         for(const mod_type& order : allowed_modulations)
-            constellations[(int)order] = generate_constellation(order);
+            constellations[order] = generate_constellation(order);
     }
 
     std::vector<sample> generate_constellation(const mod_type& M);
 
     protected:
-        std::unordered_map<int, std::vector<sample>> constellations;
+        std::unordered_map<mod_type, std::vector<sample>> constellations;
 
         std::shared_ptr<spdlog::logger> logger;
 
@@ -52,7 +52,7 @@ class QAM_modulator : public QAM_base {
         QAM_modulator() : QAM_base("QAM_modulator_logger", "QAM_modulator_logs.txt"){}
 
         // Modulate bits to symbols. M - count of point in constellation (4, 16, 64)
-        std::vector<sample> QAM_modulation(const std::vector<int8_t>& bits, const mod_type& M);
+        std::vector<sample> QAM_modulation(const std::vector<uint8_t>& bits, const mod_type& M);
 };
 
 class QAM_demodulator : public QAM_base {    
@@ -60,11 +60,11 @@ class QAM_demodulator : public QAM_base {
         QAM_demodulator() : QAM_base("QAM_demodulator_logger", "QAM_demodulator_logs.txt"){}
 
         // Demodulate symbols to bits. M - count of point in constellation (4, 16, 64)
-        std::vector<int8_t> QAM_soft_demodulation(const std::vector<sample>& symbols, const mod_type& M);
-        std::vector<int8_t> QAM_hard_demodulation(const std::vector<sample>& symbols, const mod_type& M);
+        std::vector<uint8_t> QAM_soft_demodulation(const std::vector<sample>& symbols, const mod_type& M);
+        std::vector<uint8_t> QAM_hard_demodulation(const std::vector<sample>& symbols, const mod_type& M);
 
     private:
-        std::vector<int8_t> QPSK_hard_demodulation(const std::vector<sample>& symbols);
-        std::vector<int8_t> QAM16_hard_demodulation(const std::vector<sample>& symbols);
-        std::vector<int8_t> QAM64_hard_demodulation(const std::vector<sample>& symbols);
+        std::vector<uint8_t> QPSK_hard_demodulation(const std::vector<sample>& symbols);
+        std::vector<uint8_t> QAM16_hard_demodulation(const std::vector<sample>& symbols);
+        std::vector<uint8_t> QAM64_hard_demodulation(const std::vector<sample>& symbols);
 };
